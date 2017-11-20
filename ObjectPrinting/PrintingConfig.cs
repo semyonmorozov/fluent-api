@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace ObjectPrinting
@@ -37,5 +38,29 @@ namespace ObjectPrinting
             }
             return sb.ToString();
         }
+
+        internal PrintingConfig<TOwner> SetPropSerialization<TPropType>(Expression<Func<TOwner, TPropType>> serializeFunc)
+        {
+            return this;
+        }
+
+        public PrintingConfig<TOwner> ExcludeType<TPropType>()
+        {
+            return this;
+        }
+
+        public PropertyPrintingConfig<TOwner,TPropType> Printing<TPropType>()
+        {
+            return new PropertyPrintingConfig<TOwner, TPropType>(this);
+        }
+
+        public PropertyPrintingConfig<TOwner, TPropType> Printing<TPropType>(Expression<Func<TOwner,TPropType>> prop)
+        {
+            return new PropertyPrintingConfig<TOwner, TPropType>(this);
+        }
+
+
     }
+
+    
 }
