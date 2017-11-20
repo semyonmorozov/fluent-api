@@ -5,7 +5,7 @@ namespace ObjectPrinting
 {
     public class PropertyPrintingConfig<TOwner, TPropType> : IPropertyPrintingConfig<TOwner, TPropType>
     {
-        private PrintingConfig<TOwner> printingConfig;
+        private readonly PrintingConfig<TOwner> printingConfig;
 
         public PropertyPrintingConfig(PrintingConfig<TOwner> printingConfig)
         {
@@ -17,19 +17,29 @@ namespace ObjectPrinting
             return printingConfig;
         }
 
-        PrintingConfig<TOwner> IPropertyPrintingConfig<TOwner, TPropType>.PrintingConfig => printingConfig;
+        public PrintingConfig<TOwner> Using(CultureInfo culture)
+        {
+            return printingConfig;
+        }
+
+        PrintingConfig<TOwner> IPropertyPrintingConfig<TOwner, TPropType>.ParentConfig => printingConfig;
     }
 
     public interface IPropertyPrintingConfig<TOwner, TPropType>
     {
-        PrintingConfig<TOwner> PrintingConfig { get; }
+        PrintingConfig<TOwner> ParentConfig { get; }
     }
 
     public static class PropertyPrintingConfigExtension
     {
-        public static PrintingConfig<TOwner> Use<TOwner>(this PropertyPrintingConfig<TOwner,int> propPrintingConfig, CultureInfo cultureInfo)
+        public static string PrintToString<T>(this T obj, Func<PrintingConfig<T>, PrintingConfig<T>> config)
         {
-            return ((IPropertyPrintingConfig<TOwner,int>)propPrintingConfig).PrintingConfig;
+            return config(ObjectPrinter.For<T>()).PrintToString(obj);
+        }
+
+        public static PrintingConfig<TOwner> TrimmedToLength<TOwner>(this PropertyPrintingConfig<TOwner, string> propConfig, int maxLen)
+        {
+            return ((IPropertyPrintingConfig<TOwner, string>)propConfig).ParentConfig;
         }
     }
 

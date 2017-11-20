@@ -39,26 +39,26 @@ namespace ObjectPrinting
             return sb.ToString();
         }
 
-        internal PrintingConfig<TOwner> SetPropSerialization<TPropType>(Expression<Func<TOwner, TPropType>> serializeFunc)
-        {
-            return this;
-        }
-
-        public PrintingConfig<TOwner> ExcludeType<TPropType>()
-        {
-            return this;
-        }
-
         public PropertyPrintingConfig<TOwner,TPropType> Printing<TPropType>()
         {
             return new PropertyPrintingConfig<TOwner, TPropType>(this);
         }
 
-        public PropertyPrintingConfig<TOwner, TPropType> Printing<TPropType>(Expression<Func<TOwner,TPropType>> prop)
+        public PropertyPrintingConfig<TOwner, TPropType> Printing<TPropType>(Expression<Func<TOwner,TPropType>> memberSelector)
         {
             return new PropertyPrintingConfig<TOwner, TPropType>(this);
         }
+        
+        public PrintingConfig<TOwner> Excluding<TPropType>(Expression<Func<TOwner, TPropType>> memberSelector)
+        {
+            return this;
+        }
 
+        internal PrintingConfig<TOwner> Excluding<TPropType>()
+        {
+            return this;
+        }
+        
 
     }
 
