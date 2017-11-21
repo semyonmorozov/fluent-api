@@ -19,11 +19,11 @@ namespace ObjectPrinting.Tests
 		        //2. Указать альтернативный способ сериализации для определенного типа
 		        .Printing<int>().Using(i => i.ToString("x"))
 		        //3. Для числовых типов указать культуру
-		        .Printing<int>().Using(CultureInfo.InvariantCulture)
+		        .Printing<double>().Using(CultureInfo.InvariantCulture)
 		        //4. Настроить сериализацию конкретного свойства
 		        .Printing(p=>p.Age).Using(age => age.ToString())
 				//5. Настроить обрезание строковых свойств (метод должен быть виден только для строковых свойств)
-		        .Printing(p => p.Name).TrimmedToLength(10)
+		        .Printing(p => p.Name).TrimmedToLength(2)
                 //6. Исключить из сериализации конкретного свойства
 		        .Excluding(p => p.Height);
 
@@ -112,7 +112,7 @@ namespace ObjectPrinting.Tests
                 .TrimmedToLength(2)
                 .PrintToString(person);
             TestContext.WriteLine(result);
-            result.Should().Contain("Al\t");
+            result.Should().Contain("Al\r");
         }
     }
 }
