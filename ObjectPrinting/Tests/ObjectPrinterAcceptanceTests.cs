@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using FluentAssertions;
 using NUnit.Framework;
 
 namespace ObjectPrinting.Tests
@@ -38,4 +39,80 @@ namespace ObjectPrinting.Tests
 		    TestContext.WriteLine(s3);
         }
 	}
+
+    [TestFixture]
+    public class ObjectPrinter_Should
+    {
+        private Person person;
+        [SetUp]
+        public void SetUp()
+        {
+            person = new Person { Name = "Alex", Age = 16, Height = 167.8 };
+        }
+
+        [Test]
+        public void ExcludeType()
+        {
+            var result = ObjectPrinter.For<Person>()
+                .Excluding<Guid>()
+                .PrintToString(person);
+            TestContext.WriteLine(result);
+            result.Should().NotContain("Id");
+        }
+
+        [Test]
+        public void ExcludeProperty()
+        {
+            var result = ObjectPrinter.For<Person>()
+                .Excluding(p => p.Height)
+                .PrintToString(person);
+            TestContext.WriteLine(result);
+            result.Should().NotContain("Height");
+            
+        }
+
+        [Test]
+        public void UseCustomSerializer_ForType()
+        {
+            var result = ObjectPrinter.For<Person>()
+                .Printing<int>()
+                .Using(i => i.ToString("x"))
+                .PrintToString(person);
+            TestContext.WriteLine(result);
+            result.Should().Contain("ff");
+        }
+
+        [Test]
+        public void UseCustomSerializer_ForProperty()
+        {
+            var result = ObjectPrinter.For<Person>()
+                .Printing(p => p.Height)
+                .Using(age => age+" sm")
+                .PrintToString(person);
+            TestContext.WriteLine(result);
+            result.Should().Contain("167,8 sm");
+        }
+
+        [Test]
+        public void UseCustomCulture_ForNums()
+        {
+            var result = ObjectPrinter.For<Person>()
+                .Printing<double>()
+                .Using(CultureInfo.InvariantCulture)
+                .PrintToString(person);
+            TestContext.WriteLine(result);
+            result.Should().Contain("167.8");
+        }
+
+        [Test]
+        public void TrimString()
+        {
+            var result = ObjectPrinter.For<Person>()
+                .Printing(p => p.Name)
+                .TrimmedToLength(2)
+                .PrintToString(person);
+            TestContext.WriteLine(result);
+            result.Should().Contain("Al\t");
+        }
+    }
 }
