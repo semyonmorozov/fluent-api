@@ -76,10 +76,10 @@ namespace ObjectPrinting.Tests
         {
             var result = ObjectPrinter.For<Person>()
                 .Printing<int>()
-                .Using(i => i.ToString("x"))
+                .Using(i => i+" year")
                 .PrintToString(person);
             TestContext.WriteLine(result);
-            result.Should().Contain("ff");
+            result.Should().Contain("16 year");
         }
 
         [Test]

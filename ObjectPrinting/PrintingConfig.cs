@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using FluentAssertions;
 
 namespace ObjectPrinting
 {
@@ -60,6 +58,8 @@ namespace ObjectPrinting
         private string Serialize(object obj, PropertyInfo propertyInfo, int nestingLevel)
         {
             var value = propertyInfo.GetValue(obj);
+            if (propSerializators.ContainsKey(propertyInfo.Name))
+                return propSerializators[propertyInfo.Name].DynamicInvoke(value) + Environment.NewLine;
             if (typeSerializators.ContainsKey(propertyInfo.PropertyType))
                 return typeSerializators[propertyInfo.PropertyType].DynamicInvoke(value) + Environment.NewLine;
             if (usedCultures.ContainsKey(propertyInfo.PropertyType))
