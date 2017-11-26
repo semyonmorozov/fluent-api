@@ -23,7 +23,7 @@ namespace ObjectPrinting.Tests
 		        //4. Настроить сериализацию конкретного свойства
 		        .Printing(p=>p.Age).Using(age => age.ToString())
 				//5. Настроить обрезание строковых свойств (метод должен быть виден только для строковых свойств)
-		        .Printing(p => p.Name).TrimmedToLength(2)
+		        .Printing(p => p.Name).TrimmedToLength(1)
                 //6. Исключить из сериализации конкретного свойства
 		        .Excluding(p => p.Height);
 
@@ -51,6 +51,74 @@ namespace ObjectPrinting.Tests
         }
 
         [Test]
+        public void PrintObjects()
+        {
+            var result = ObjectPrinter.For<Person>()
+                .PrintToString(person);
+            TestContext.WriteLine(result);
+            var expectedStr = "Person\r\n	Id = Guid\r\n	Name = Alex\r\n	" +
+                              "Height = 167,8\r\n	Age = 16\r\n	Parent = null\r\n";
+            result.Should().Be(expectedStr);
+        }
+
+        [Test]
+        public void SetCorrectNesting()
+        {
+            var parent = new Person {Name = "Ivan", Age = 54, Height = 168.9};
+            person = new Person {Name = "Anna", Age = 17, Height = 178.8, Parent = parent};
+
+            var result = ObjectPrinter.For<Person>()
+                .PrintToString(person);
+            TestContext.WriteLine(result);
+            var expectedStr = "Person\r\n" +
+                              "\tId = Guid\r\n" +
+                              "\tName = Anna\r\n" +
+                              "\tHeight = 178,8\r\n" +
+                              "\tAge = 17\r\n" +
+                              "\tParent = Person\r\n" +
+                              "\t\tId = Guid\r\n" +
+                              "\t\tName = Ivan\r\n" +
+                              "\t\tHeight = 168,9\r\n" +
+                              "\t\tAge = 54\r\n" +
+                              "\t\tParent = null\r\n";
+            result.Should().Be(expectedStr);
+        }
+
+        [Test]
+        public void CorrectlyPrintNullObjects()
+        {
+            person = new Person();
+            var result = ObjectPrinter.For<Person>()
+                .PrintToString(person);
+            TestContext.WriteLine(result);
+            var expectedStr = "Person\r\n	Id = Guid\r\n	Name = null\r\n" +
+                              "	Height = 0\r\n	Age = 0\r\n	Parent = null\r\n";
+            result.Should().Be(expectedStr);
+        }
+
+        [Test]
+        public void Throw_OutOfRangeException_WhenTrimmedString_LessThenZero()
+        {
+            var result = ObjectPrinter
+                .For<Person>()
+                .Printing(p => p.Name)
+                .TrimmedToLength(-1);
+            var action = new Action(()=>result.PrintToString(person));
+            action.ShouldThrow<ArgumentOutOfRangeException>();
+        }
+
+        [Test]
+        public void Throw_OutOfRangeException_WhenTrimmedString_LongerThanRawString()
+        {
+            var result = ObjectPrinter
+                .For<Person>()
+                .Printing(p => p.Name)
+                .TrimmedToLength(15);
+            var action = new Action(() => result.PrintToString(person));
+            action.ShouldThrow<ArgumentOutOfRangeException>();
+        }
+
+        [Test]
         public void ExcludeType()
         {
             var result = ObjectPrinter.For<Person>()
@@ -67,8 +135,8 @@ namespace ObjectPrinting.Tests
                 .Excluding(p => p.Height)
                 .PrintToString(person);
             TestContext.WriteLine(result);
-            result.Should().NotContain("Height");
-            
+            var expectedStr = "Person\r\n	Id = Guid\r\n	Name = Alex\r\n	Age = 16\r\n	Parent = null\r\n";
+            result.Should().Be(expectedStr);
         }
 
         [Test]
